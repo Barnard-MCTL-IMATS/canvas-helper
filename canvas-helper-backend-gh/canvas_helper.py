@@ -9,7 +9,6 @@ API_URL = ''
 API_KEY = ''
 canvas    = Canvas(API_URL, API_KEY)
 
-
 def authenticate_user():
     store = file.Storage('token.json')
     creds = store.get()
@@ -19,12 +18,18 @@ def authenticate_user():
     service = build('drive', 'v3', http=creds.authorize(Http()))
     return service
 
-
-
-
-
 @app.route('/')
 def index():
+    service = authenticate_user()
+    results = service.files().list(pageSize=10, fields="nextPageToken, files(id, name)").execute()
+    items = results.get('files', [])
+
+    if not items:
+        print('No files found.')
+    else:
+        print('Files:')
+        for item in items:
+            print(u'{0} ({1})'.format(item['name'], item['id']))
 	return render_template('index.html')
 
 @app.route('/emails')
