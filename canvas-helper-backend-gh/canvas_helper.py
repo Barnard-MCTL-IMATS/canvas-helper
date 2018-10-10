@@ -9,6 +9,20 @@ API_URL = ''
 API_KEY = ''
 canvas    = Canvas(API_URL, API_KEY)
 
+
+def authenticate_user():
+    store = file.Storage('token.json')
+    creds = store.get()
+    if not creds or creds.invalid:
+        flow = client.flow_from_clientsecrets('credentials.json', SCOPES)
+        creds = tools.run_flow(flow, store)
+    service = build('drive', 'v3', http=creds.authorize(Http()))
+    return service
+
+
+
+
+
 @app.route('/')
 def index():
 	return render_template('index.html')
