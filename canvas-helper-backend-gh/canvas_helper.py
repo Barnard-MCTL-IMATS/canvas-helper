@@ -9,7 +9,19 @@ API_URL = ''
 API_KEY = ''
 canvas    = Canvas(API_URL, API_KEY)
 
+def get_credentials():
+	credential_path = 'credentials.json'
 
+	store = Storage(credential_path)
+	credentials = store.get()
+	if not credentials or credentials.invalid:
+		print("Credentials not found.")
+		return False
+	else:
+		print("Credentials fetched successfully.")
+		return credentials
+	
+	
 def fetch(query, sort='modifiedTime desc'):
 	credentials = get_credentials()
 	http = credentials.authorize(httplib2.Http())
