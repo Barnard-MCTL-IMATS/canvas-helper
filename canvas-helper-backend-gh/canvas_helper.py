@@ -43,17 +43,18 @@ def authenticate_user():
 
 @app.route('/')
 def index():
-    service = authenticate_user()
-    results = service.files().list(pageSize=10, fields="nextPageToken, files(id, name)").execute()
-    items = results.get('files', [])
-
-    if not items:
-        print('No files found.')
-    else:
-        print('Files:')
-        for item in items:
-            print(u'{0} ({1})'.format(item['name'], item['id']))
-	return render_template('index.html')
+	credentials = get_credentials()
+	if credentials == False:
+		return redirect(url_for('oauth2callback'))
+	elif credentials.access_token_expired:
+		return redirect(url_for('oauth2callback'))
+	else:
+		print('now calling fetch')
+		all_files = fetch("'root' in parents and mimeType = 'application/vnd.google-apps.folder'", sort='modifiedTime desc')
+		s = ""
+		for file in all_files:
+			s += "%s, %s<br>" % (file['name'],file['id'])
+		return s
 
 @app.route('/emails')
 def emails():
@@ -77,4 +78,5 @@ def names():
 
 
 if __name__ == '__main__':
+    app.secret_key = str(uuid.uuid4())
     app.run(debug=True)
