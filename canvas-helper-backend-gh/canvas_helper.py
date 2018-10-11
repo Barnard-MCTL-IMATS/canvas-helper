@@ -9,6 +9,17 @@ API_URL = ''
 API_KEY = ''
 canvas    = Canvas(API_URL, API_KEY)
 
+
+def fetch(query, sort='modifiedTime desc'):
+	credentials = get_credentials()
+	http = credentials.authorize(httplib2.Http())
+	service = discovery.build('drive', 'v3', http=http)
+	results = service.files().list(
+		q=query,orderBy=sort,pageSize=10,fields="nextPageToken, files(id, name)").execute()
+	items = results.get('files', [])
+	return items
+
+
 def authenticate_user():
     store = file.Storage('token.json')
     creds = store.get()
